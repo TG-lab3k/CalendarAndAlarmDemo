@@ -22,5 +22,13 @@
             android:layout_height="wrap_content"
             android:text="添加闹钟"
             />
+
+        <Button
+            android:id="@+id/notificationTest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="生成通知"
+            />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

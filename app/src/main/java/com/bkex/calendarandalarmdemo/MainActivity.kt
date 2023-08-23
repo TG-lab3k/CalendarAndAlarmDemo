@@ -1,6 +1,8 @@
 package com.bkex.calendarandalarmdemo
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -11,12 +13,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.WindowCompat
 import com.bkex.calendarandalarmdemo.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 import java.util.*
 
 private const val TAG = "ALARM-TEST"
+private const val CHANNEL_ID = "AlarmNotification"
+private const val notificationId = 0x01
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,6 +45,10 @@ class MainActivity : AppCompatActivity() {
         binding.contentLayout.timeAddedBtn.setOnClickListener {
             var time = binding.contentLayout.timeEditText.text.toString()
             testAlarm(time)
+        }
+
+        binding.contentLayout.notificationTest.setOnClickListener {
+            createNotification()
         }
     }
 
@@ -90,6 +100,33 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "闹钟添加成功: $time")
             Toast.makeText(applicationContext, "闹钟添加成功: $time", Toast.LENGTH_LONG).show()
         }
+    }
 
+    private fun createNotification() {
+        createNotificationChannel()
+        var builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher_round).setContentTitle("通知测试")
+            .setContentText("时间到了..").setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        with(NotificationManagerCompat.from(applicationContext)) {
+            // notificationId is a unique int for each notification that you must define
+            notify(notificationId, builder.build())
+        }
+    }
+
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "AlarmNotification"
+            val descriptionText = "Alarm-Notification-test"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 }
