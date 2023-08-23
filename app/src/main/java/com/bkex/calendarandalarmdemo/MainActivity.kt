@@ -3,11 +3,14 @@ package com.bkex.calendarandalarmdemo
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -20,7 +23,7 @@ import com.bkex.calendarandalarmdemo.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 import java.util.*
 
-private const val TAG = "ALARM-TEST"
+const val TAG = "ALARM-TEST"
 private const val CHANNEL_ID = "AlarmNotification"
 private const val notificationId = 0x01
 
@@ -44,7 +47,8 @@ class MainActivity : AppCompatActivity() {
         }
         binding.contentLayout.timeAddedBtn.setOnClickListener {
             var time = binding.contentLayout.timeEditText.text.toString()
-            testAlarm(time)
+            //testAlarm(time)
+            testAlarmWithPendingIntent(time)
         }
 
         binding.contentLayout.notificationTest.setOnClickListener {
@@ -101,6 +105,40 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "闹钟添加成功: $time", Toast.LENGTH_LONG).show()
         }
     }
+
+    private fun testAlarmWithPendingIntent(time: String) {
+        if (time.isNullOrBlank()) {
+            return
+        }
+
+        val timeDivider = time.split(":")
+        if (timeDivider.size != 2) {
+            return
+        }
+
+        val hour = timeDivider[0]
+        val minute = timeDivider[1]
+
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis()
+        calendar.set(Calendar.HOUR_OF_DAY, hour.toInt())
+        calendar.set(Calendar.MINUTE, minute.toInt())
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+
+        var alarmManager: AlarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(applicationContext, AlarmReceiver::class.java)
+        intent.putExtra("time", time)
+        val requestCode = time.hashCode()
+        val pendingIntent = PendingIntent.getBroadcast(
+            applicationContext, requestCode, intent, PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+        Log.d(TAG, "闹钟添加成功: $time")
+        Toast.makeText(applicationContext, "闹钟添加成功: $time", Toast.LENGTH_LONG).show()
+    }
+
 
     private fun createNotification() {
         createNotificationChannel()
