@@ -1,23 +1,25 @@
 package com.bkex.calendarandalarmdemo
 
 import android.app.AlarmManager
-import android.app.AlarmManager.OnAlarmListener
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.AlarmManagerCompat
 import androidx.core.view.WindowCompat
 import com.bkex.calendarandalarmdemo.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
-import java.util.Calendar
+import java.util.*
+
+private const val TAG = "ALARM-TEST"
 
 class MainActivity : AppCompatActivity() {
+
 
     private lateinit var binding: ActivityMainBinding
 
@@ -80,10 +82,13 @@ class MainActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP, calendar.timeInMillis, "", OnAlarmListener {
+                AlarmManager.RTC_WAKEUP, calendar.timeInMillis, "", {
+                    Log.d(TAG, "#testAlarm# 闹钟时间到：$time")
                     Toast.makeText(applicationContext, "时间到：$time", Toast.LENGTH_LONG).show()
-                }, Handler()
+                }, Handler(Looper.getMainLooper())
             )
+            Log.d(TAG, "闹钟添加成功: $time")
+            Toast.makeText(applicationContext, "闹钟添加成功: $time", Toast.LENGTH_LONG).show()
         }
 
     }
